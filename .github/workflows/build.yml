@@ -1,0 +1,41 @@
+name: Build trial (iOS simulator + Android APK)
+
+# TimeOurs 登入頁 Flutter 試跑：只驗證「程式碼推上 GitHub 後，
+# 雲端 Runner 能不能編出 iOS 模擬器版與 Android APK」。
+# 不做簽署、不上架、不接後端，所以不需要任何憑證或密鑰。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ios-simulator:
+    name: iOS simulator build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter build ios --simulator --no-codesign
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-app
+          path: build/ios/iphonesimulator/Runner.app
+
+  android-apk:
+    name: Android debug APK build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
